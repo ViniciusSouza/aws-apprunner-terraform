@@ -1,7 +1,7 @@
 ---
 mode: 'agent'
 description: 'Create a structured, goal-oriented implementation plan for Spring PetClinic. Analyzes complexity, breaks down large goals, and generates detailed plans with tasks, testing strategy, and agent delegation.'
-tools: ['edit/createFile', 'read', 'semantic_search', 'grep_search', 'list_dir']
+tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', 'todos', 'usages']
 ---
 
 # Create Goal-Oriented Plan

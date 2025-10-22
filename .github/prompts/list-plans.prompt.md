@@ -1,7 +1,7 @@
 ---
 mode: 'agent'
 description: 'List all implementation plans with status (pending, in-progress, completed, blocked). Shows progress, effort estimates, and agent task tracking.'
-tools: ['read', 'list_dir', 'grep_search']
+tools: ['search']
 ---
 
 # List Implementation Plans
