@@ -1,11 +1,15 @@
 ---
 goal: "Critical Security Fixes - Address EOL Dependencies"
-status: pending
+status: in-progress
 created: 2025-10-22
+started: 2025-10-22
 estimated_effort: medium
 sprint: 1
 delegate_to_agent: true
 agent_tasks: 4
+tasks_total: 14
+tasks_completed: 0
+agent_tasks_completed: 0
 ---
 
 # Implementation Plan: Critical Security Fixes
