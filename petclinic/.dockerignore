@@ -1,0 +1,36 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Build output
+target/
+*.class
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+README*
+HELP*
+
+# CI/CD
+.github/
+
+# Infrastructure
+terraform/
+docs/
+plan/
+
+# Test reports
+*.log
