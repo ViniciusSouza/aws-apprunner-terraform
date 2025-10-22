@@ -1,10 +1,21 @@
-# Build and Deploy Spring Petclinic Application to AWS App Runner using AWS CodePipeline, Amazon RDS and Terraform 
+# Spring PetClinic - Multi-Cloud Deployment
 
 ![Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSy9rWmVENzRDbXBoVlhYaHBsNks4OGJDRXFtV1IySmhCVjJoaytDU2dtVWhhVys3NS9Odk5DbC9lR2JUTkRvSWlHSXZrNVhYQ3ZsaUJFY3o4OERQY1pnPSIsIml2UGFyYW1ldGVyU3BlYyI6IlB3ODEyRW9KdU0yaEp6NDkiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/aws/aws-cdk)
-[![NPM version](https://badge.fury.io/js/aws-cdk.svg)](https://badge.fury.io/js/aws-cdk)
-[![PyPI version](https://badge.fury.io/py/aws-cdk.core.svg)](https://badge.fury.io/py/aws-cdk.core)
-[![NuGet version](https://badge.fury.io/nu/Amazon.CDK.svg)](https://badge.fury.io/nu/Amazon.CDK)
+
+## 🚀 Quick Links
+
+### AWS Deployment (Original)
+- **Infrastructure:** AWS App Runner + RDS MySQL
+- **Guide:** [AWS Deployment Instructions](#aws-deployment) (see below)
+
+### Azure Deployment (Emergency Migration) ⚡
+- **Infrastructure:** Azure App Service + Azure Database for MySQL
+- **Quick Start:** [Azure Deployment Guide](docs/azure-deployment-guide.md)
+- **Terraform:** [azure/terraform/](azure/terraform/)
+- **Status:** Production-ready, fast-track deployment
+
+---
 
 ## Introduction
 
@@ -21,9 +32,34 @@ The Spring PetClinic sample application is designed to show how the Spring appli
 1. Irshad A Buchh, Amazon Web Services
 
 ## Architecture
+
+### AWS Architecture (Original)
 ![Architecture](images/Architecture.png)
 
-## Prerequisites
+### Azure Architecture (Emergency Migration)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Azure Cloud                              │
+│                                                              │
+│  ┌──────────────────┐         ┌──────────────────────────┐ │
+│  │  Azure App       │─────────│  Azure Database for MySQL │ │
+│  │  Service         │         │  Flexible Server          │ │
+│  │  (Linux)         │         │  - MySQL 8.0              │ │
+│  └──────────────────┘         └──────────────────────────┘ │
+│         │                                                    │
+│         ▼                                                    │
+│  ┌──────────────────┐                                       │
+│  │  Application     │                                       │
+│  │  Insights        │                                       │
+│  └──────────────────┘                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Deployment Options
+
+### Option 1: AWS Deployment (Original)
+
+#### Prerequisites (AWS)
 
 Before you build the whole infrastructure, including your CI/CD pipeline, you will need to meet the following pre-requisites.
 
@@ -384,6 +420,160 @@ git push origin master
 ```
 
 As before, you can use the console to observe the progression of the change through the pipeline. Once done, verify that the application is working with the modified welcome message.
+
+---
+
+## Option 2: Azure Deployment (Emergency Migration) ⚡
+
+### Quick Start - Azure
+
+For emergency deployment to Azure (e.g., AWS outage), follow these steps:
+
+#### Prerequisites (Azure)
+
+1. **Azure CLI** - [Install Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+   ```bash
+   az --version
+   az login
+   ```
+
+2. **Terraform** >= 1.5.0 - [Install Terraform](https://www.terraform.io/downloads)
+   ```bash
+   terraform --version
+   ```
+
+3. **Docker** - [Install Docker](https://docs.docker.com/get-docker/)
+   ```bash
+   docker --version
+   ```
+
+#### Fast-Track Deployment (2-3 days)
+
+**Step 1: Build Docker Image (10 mins)**
+```bash
+cd petclinic
+mvn clean package -DskipTests
+docker build -t petclinic:azure .
+
+# Push to GitHub Container Registry
+echo $GITHUB_TOKEN | docker login ghcr.io -u ViniciusSouza --password-stdin
+docker tag petclinic:azure ghcr.io/viniciusouza/petclinic:latest
+docker push ghcr.io/viniciusouza/petclinic:latest
+```
+
+**Step 2: Deploy Infrastructure (15 mins)**
+```bash
+cd ../azure/terraform
+
+# Configure variables
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with unique names
+
+# Set database password
+export TF_VAR_db_admin_password="YourSecurePassword123!"
+
+# Deploy
+terraform init
+terraform apply -auto-approve
+```
+
+**Step 3: Deploy Database Schema (5 mins)**
+```bash
+# Get database host
+DB_HOST=$(terraform output -raw database_fqdn)
+
+# Deploy schema
+cd ../../petclinic
+mysql -h $DB_HOST -u adminuser -p petclinic < src/main/resources/db/mysql/schema.sql
+mysql -h $DB_HOST -u adminuser -p petclinic < src/main/resources/db/mysql/data.sql
+```
+
+**Step 4: Verify Deployment (5 mins)**
+```bash
+# Get application URL
+APP_URL=$(terraform output -raw app_service_url)
+
+# Test health
+curl $APP_URL/actuator/health
+
+# Open in browser
+open $APP_URL
+```
+
+**Total Time: ~35 minutes** ⏱️
+
+### Detailed Azure Documentation
+
+For comprehensive deployment instructions, troubleshooting, and maintenance:
+
+- **[Azure Deployment Guide](docs/azure-deployment-guide.md)** - Complete deployment walkthrough
+- **[Azure Terraform README](azure/README.md)** - Infrastructure details and management
+- **[Implementation Plan](docs/plans/plan-emergency-azure-migration.md)** - Full migration strategy
+
+### Azure Infrastructure
+
+The Azure deployment includes:
+- **Azure App Service** - Linux container hosting
+- **Azure Database for MySQL** Flexible Server - Managed database
+- **Application Insights** - Monitoring and diagnostics
+- **Log Analytics** - Centralized logging
+- **Automated Alerts** - Health monitoring
+
+### Cost Comparison
+
+| Environment | Configuration | Monthly Cost |
+|-------------|---------------|--------------|
+| Testing | B1 + B1ms | ~$38 |
+| Production | P1v2 + GP | ~$256 |
+
+### Migration from AWS to Azure
+
+If you're migrating from AWS:
+
+1. **Export AWS RDS data:**
+   ```bash
+   mysqldump -h <aws-rds>.rds.amazonaws.com -u admin -p petclinic > aws_backup.sql
+   ```
+
+2. **Import to Azure:**
+   ```bash
+   mysql -h <azure-db>.mysql.database.azure.com -u adminuser -p petclinic < aws_backup.sql
+   ```
+
+3. **Update DNS** to point to Azure App Service
+
+4. **Keep AWS running** as fallback initially
+
+### CI/CD with GitHub Actions
+
+Automated deployment is configured in `.github/workflows/azure-deploy.yml`:
+
+```bash
+# Triggers on push to main or manual dispatch
+# Builds Docker image
+# Pushes to GitHub Container Registry
+# Deploys to Azure App Service
+# Runs health checks
+```
+
+---
+
+## Recent Updates
+
+### Sprint 1: Critical Security Fixes ✅
+- Spring Boot 2.3.3 → 2.7.18 (LTS)
+- jQuery 2.2.4 → 3.7.1 (fixes 3 critical CVEs)
+- Bootstrap 3.3.6 → 3.4.1
+- Docker security hardening
+- See: [Sprint 1 Summary](docs/sprint-1-summary.md)
+
+### Sprint 2: Emergency Azure Migration 🚧
+- Fast-track deployment to Azure
+- Multi-cloud capability
+- Automated CI/CD with GitHub Actions
+- See: [Azure Migration Plan](docs/plans/plan-emergency-azure-migration.md)
+
+---
 
 ## Tearing down the stack
 

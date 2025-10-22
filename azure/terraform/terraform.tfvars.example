@@ -1,0 +1,44 @@
+# =============================================================================
+# Azure Infrastructure Configuration
+# Copy this file to terraform.tfvars and customize values
+# =============================================================================
+
+# Resource Group
+resource_group_name = "rg-petclinic-prod"
+location            = "eastus"
+environment         = "prod"
+
+# Database
+db_server_name     = "petclinic-mysql-prod-<unique-id>" # Must be globally unique
+db_name            = "petclinic"
+db_admin_username  = "adminuser"
+# db_admin_password is required - set via environment variable or prompt
+db_sku_name        = "B_Standard_B1ms" # Burstable tier for cost savings
+db_storage_size_gb = 32
+db_mysql_version   = "8.0.21"
+
+# App Service
+app_service_plan_name = "plan-petclinic-prod"
+app_service_name      = "petclinic-prod-<unique-id>" # Must be globally unique
+app_service_sku       = "P1v2" # P1v2 for production, B1 for testing
+docker_image          = "ghcr.io/viniciusouza/petclinic:latest"
+container_port        = 80
+
+# Monitoring
+app_insights_name = "petclinic-insights-prod"
+
+# Network
+enable_vnet_integration = false # Enable later for enhanced security
+allowed_ip_addresses    = ["0.0.0.0/0"] # Restrict in production
+
+# =============================================================================
+# Environment-Specific Examples
+# =============================================================================
+
+# Development/Testing Configuration (Lower Cost):
+# app_service_sku       = "B1"          # ~$13/month
+# db_sku_name          = "B_Standard_B1ms" # ~$20/month
+
+# Production Configuration (Better Performance):
+# app_service_sku       = "P1v2"        # ~$96/month
+# db_sku_name          = "GP_Standard_D2ds_v4" # ~$140/month
