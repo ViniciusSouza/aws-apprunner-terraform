@@ -245,6 +245,7 @@
         </configuration>
       </plugin>
 
+      <!-- Temporarily disabled due to dependency conflict
       <plugin>
         <groupId>ro.isdc.wro4j</groupId>
         <artifactId>wro4j-maven-plugin</artifactId>
@@ -282,6 +283,7 @@
           </dependency>
         </dependencies>
       </plugin>
+      -->
     </plugins>
   </build>
 
