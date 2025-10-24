@@ -19,9 +19,10 @@ resource "azurerm_mysql_flexible_server" "petclinic" {
   backup_retention_days        = 7
   geo_redundant_backup_enabled = false
   
-  high_availability {
-    mode = "Disabled" # Enable later for production
-  }
+  # High availability disabled for emergency migration (enable later for production)
+  # high_availability {
+  #   mode = "ZoneRedundant"
+  # }
 
   tags = {
     Environment = var.environment
