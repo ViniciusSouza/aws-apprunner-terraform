@@ -1,0 +1,35 @@
+# Multi-stage build for Azure deployment
+# Stage 1: Build application with Maven
+FROM maven:3.8-openjdk-8 AS build
+
+WORKDIR /build
+
+# Copy pom.xml and download dependencies (cache layer)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source and build
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: Runtime image
+FROM public.ecr.aws/bitnami/java:1.8.422
+
+# Create non-root user
+RUN groupadd -r spring && useradd -r -g spring spring
+
+WORKDIR /app
+
+# Copy JAR from build stage
+COPY --from=build /build/target/spring-petclinic-*.jar app.jar
+
+# Change ownership
+RUN chown -R spring:spring /app
+
+# Switch to non-root user
+USER spring
+
+EXPOSE 80
+
+# Azure-friendly entrypoint (no AWS SSM dependency)
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
